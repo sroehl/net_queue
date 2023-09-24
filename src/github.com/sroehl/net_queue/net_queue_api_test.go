@@ -73,3 +73,26 @@ func Test_Delete_Nonexistant_Queue_API(t *testing.T) {
 	}
 	assert.Equal(ERROR, resp.Status)
 }
+
+func Test_List_Queue(t *testing.T) {
+	assert := assert.New(t)
+	s := new_server("localhost", 4545)
+	s.connect()
+	create_resp1, create_err1 := s.create_queue("listQueue1")
+	if create_err1 != nil {
+		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", create_err1))
+	}
+	assert.Equal(SUCCESS, create_resp1.Status)
+	create_resp2, create_err2 := s.create_queue("listQueue2")
+	if create_err2 != nil {
+		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", create_err1))
+	}
+	assert.Equal(SUCCESS, create_resp2.Status)
+
+	resp, err := s.list_queues()
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to list queues, got error: %v", create_err1))
+	}
+	assert.Equal(SUCCESS, resp.Status)
+	assert.Contains(resp.Msg, "listQueue1,listQueue2")
+}
