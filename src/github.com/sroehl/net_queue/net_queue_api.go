@@ -29,6 +29,14 @@ func (s Server) create_queue(queue_name string) (NetResponse, error) {
 	return s.send_cmd(net_cmd)
 }
 
+func (s Server) delete_queue(queue_name string) (NetResponse, error) {
+	net_cmd := NetMessageCmd{
+		Command:   DELETE_QUEUE,
+		Arguments: queue_name,
+	}
+	return s.send_cmd(net_cmd)
+}
+
 func (s Server) send_cmd(net_cmd NetMessageCmd) (NetResponse, error) {
 	s.connect()
 	net_msg := NetMessage{
