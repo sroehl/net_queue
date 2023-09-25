@@ -13,8 +13,8 @@ func Test_write_entry(t *testing.T) {
 	queues[queue_name] = new_queue(queue_name)
 
 	net_entry := NetMessageEntry{
-		queue: queue_name,
-		msg:   "Test message",
+		Queue: queue_name,
+		Msg:   "Test message",
 	}
 
 	resp1 := net_entry.write_entry(queues)
@@ -22,8 +22,8 @@ func Test_write_entry(t *testing.T) {
 	assert.Equal(1, queues[queue_name].size)
 
 	net_entry2 := NetMessageEntry{
-		queue: "badQueue",
-		msg:   "Test message",
+		Queue: "badQueue",
+		Msg:   "Test message",
 	}
 	resp2 := net_entry2.write_entry(queues)
 	assert.Equal(ERROR, resp2.Status)
@@ -46,7 +46,7 @@ func Test_read_entry(t *testing.T) {
 	assert.Equal("Test message", result.entry.msg)
 
 	net_entry := NetMessageEntry{
-		queue: queue_name,
+		Queue: queue_name,
 	}
 
 	resp := net_entry.read_entry(queues)
@@ -66,7 +66,7 @@ func Test_read_many(t *testing.T) {
 	assert.Equal(4, queues[queue_name].size)
 
 	net_entry := NetMessageEntry{
-		queue: queue_name,
+		Queue: queue_name,
 	}
 	resp := net_entry.read_entry(queues)
 	found := 1
@@ -74,8 +74,8 @@ func Test_read_many(t *testing.T) {
 	idx := resp.Index
 	for has_more {
 		net_entry2 := NetMessageEntry{
-			queue: queue_name,
-			index: idx + 1,
+			Queue: queue_name,
+			Index: idx + 1,
 		}
 		resp2 := net_entry2.read_entry(queues)
 		if idx+1 < 3 {

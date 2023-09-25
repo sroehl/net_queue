@@ -96,3 +96,71 @@ func Test_List_Queue(t *testing.T) {
 	assert.Equal(SUCCESS, resp.Status)
 	assert.Contains(resp.Msg, "listQueue1,listQueue2")
 }
+
+func Test_Purge_Queue(t *testing.T) {
+	assert := assert.New(t)
+	s := new_server("localhost", 4545)
+	s.connect()
+	create_resp, err := s.create_queue("purgeQueue")
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", err))
+	}
+	assert.Equal(SUCCESS, create_resp.Status)
+
+	list_resp, err := s.list_queues()
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to list queues, got error: %v", err))
+	}
+	assert.Contains(list_resp.Msg, "purgeQueue")
+
+	write_resp, err := s.write_msg("purgeQueue", "This is a test")
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to write to queue, got error: %v", err))
+	}
+	assert.Equal(SUCCESS, write_resp.Status)
+	assert.Equal("", write_resp.Msg)
+
+	purge_resp, err := s.purge_queue("purgeQueue")
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to purge queue, got error: %v", err))
+	}
+	assert.Equal(SUCCESS, purge_resp.Status)
+
+	read_resp, err := s.read_msg("purgeQueue", 0)
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to read from queue, got error: %v", err))
+	}
+	assert.Equal(NO_MSG, read_resp.Status)
+	assert.Equal("", read_resp.Msg)
+}
+
+func Test_write_read_api(t *testing.T) {
+	assert := assert.New(t)
+	s := new_server("localhost", 4545)
+	s.connect()
+	create_resp, err := s.create_queue("writeQueue")
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", err))
+	}
+	assert.Equal(SUCCESS, create_resp.Status)
+
+	list_resp, err := s.list_queues()
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to list queues, got error: %v", err))
+	}
+	assert.Contains(list_resp.Msg, "writeQueue")
+
+	write_resp, err := s.write_msg("writeQueue", "This is a test")
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to write to queue, got error: %v", err))
+	}
+	assert.Equal(SUCCESS, write_resp.Status)
+	assert.Equal("", write_resp.Msg)
+
+	read_resp, err := s.read_msg("writeQueue", 0)
+	if err != nil {
+		assert.Fail(fmt.Sprintf("Failed to read from queue, got error: %v", err))
+	}
+	assert.Equal(SUCCESS, read_resp.Status)
+	assert.Equal("This is a test", read_resp.Msg)
+}

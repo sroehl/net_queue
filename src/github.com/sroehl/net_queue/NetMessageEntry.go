@@ -1,15 +1,15 @@
 package net_queue
 
 type NetMessageEntry struct {
-	queue string
-	msg   string
-	index int
+	Queue string
+	Msg   string
+	Index int
 }
 
 func (entry NetMessageEntry) write_entry(queues map[string]*Queue) NetResponse {
-	queue, ok := queues[entry.queue]
+	queue, ok := queues[entry.Queue]
 	if ok {
-		queue.add_msg(entry.msg)
+		queue.add_msg(entry.Msg)
 		return new_netresponse(SUCCESS, "")
 	} else {
 		return new_netresponse(ERROR, "Queue does not exist")
@@ -17,9 +17,9 @@ func (entry NetMessageEntry) write_entry(queues map[string]*Queue) NetResponse {
 }
 
 func (entry NetMessageEntry) read_entry(queues map[string]*Queue) NetResponse {
-	queue, ok := queues[entry.queue]
+	queue, ok := queues[entry.Queue]
 	if ok {
-		result, err := queue.read(false, false, entry.index)
+		result, err := queue.read(false, false, entry.Index)
 		if err != nil {
 			return new_netresponse(NO_MSG, "")
 		}
