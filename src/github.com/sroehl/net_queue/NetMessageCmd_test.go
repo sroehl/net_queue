@@ -1,19 +1,11 @@
 package net_queue
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestMain(m *testing.M) {
-	fmt.Println("Starting listener")
-	go start_server(4545)
-	m.Run()
-	fmt.Println("Listener down")
-}
 
 func Test_get_queue(t *testing.T) {
 	assert := assert.New(t)

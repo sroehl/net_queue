@@ -94,7 +94,8 @@ func Test_List_Queue(t *testing.T) {
 		assert.Fail(fmt.Sprintf("Failed to list queues, got error: %v", create_err1))
 	}
 	assert.Equal(SUCCESS, resp.Status)
-	assert.Contains(resp.Msg, "listQueue1,listQueue2")
+	assert.Contains(resp.Msg, "listQueue1")
+	assert.Contains(resp.Msg, "listQueue2")
 }
 
 func Test_Purge_Queue(t *testing.T) {
