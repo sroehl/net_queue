@@ -1,4 +1,4 @@
-package net_queue
+package queue
 
 import (
 	"strings"
@@ -14,9 +14,9 @@ func Test_get_queue(t *testing.T) {
 		Command:   CREATE_QUEUE,
 		Arguments: "testQueue",
 	}
-	resp1 := net_cmd.handle_cmd(queues)
+	resp1 := net_cmd.Handle_cmd(queues)
 	assert.Equal(SUCCESS, resp1.Status)
-	resp2 := net_cmd.handle_cmd(queues)
+	resp2 := net_cmd.Handle_cmd(queues)
 	assert.Equal(ERROR, resp2.Status)
 	assert.Equal("Queue already exists", resp2.Msg)
 	assert.Equal(1, len(queues))
@@ -33,10 +33,10 @@ func Test_delete_queue(t *testing.T) {
 		Command:   DELETE_QUEUE,
 		Arguments: queue_name,
 	}
-	resp1 := net_cmd.handle_cmd(queues)
+	resp1 := net_cmd.Handle_cmd(queues)
 	assert.Equal(SUCCESS, resp1.Status)
 
-	resp2 := net_cmd.handle_cmd(queues)
+	resp2 := net_cmd.Handle_cmd(queues)
 	assert.Equal(ERROR, resp2.Status)
 	assert.Equal("Queue does not exist", resp2.Msg)
 	assert.Equal(2, len(queues))
@@ -51,12 +51,12 @@ func Test_list_queues(t *testing.T) {
 	net_cmd := NetMessageCmd{
 		Command: LIST_QUEUES,
 	}
-	resp1 := net_cmd.handle_cmd(queues)
+	resp1 := net_cmd.Handle_cmd(queues)
 	assert.Equal(SUCCESS, resp1.Status)
 	assert.Equal(3, len(strings.Split(resp1.Msg, ",")))
 
 	queues["testQueue3"] = new_queue("testQueue3")
-	resp2 := net_cmd.handle_cmd(queues)
+	resp2 := net_cmd.Handle_cmd(queues)
 	assert.Equal(SUCCESS, resp2.Status)
 	assert.Equal(4, len(strings.Split(resp2.Msg, ",")))
 }

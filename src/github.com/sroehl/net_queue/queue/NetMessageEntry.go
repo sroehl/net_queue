@@ -1,4 +1,4 @@
-package net_queue
+package queue
 
 type NetMessageEntry struct {
 	Queue string
@@ -6,7 +6,7 @@ type NetMessageEntry struct {
 	Index int
 }
 
-func (entry NetMessageEntry) write_entry(queues map[string]*Queue) NetResponse {
+func (entry NetMessageEntry) Write_entry(queues map[string]*Queue) NetResponse {
 	queue, ok := queues[entry.Queue]
 	if ok {
 		queue.add_msg(entry.Msg)
@@ -16,7 +16,7 @@ func (entry NetMessageEntry) write_entry(queues map[string]*Queue) NetResponse {
 	}
 }
 
-func (entry NetMessageEntry) read_entry(queues map[string]*Queue) NetResponse {
+func (entry NetMessageEntry) Read_entry(queues map[string]*Queue) NetResponse {
 	queue, ok := queues[entry.Queue]
 	if ok {
 		result, err := queue.read(false, false, entry.Index)

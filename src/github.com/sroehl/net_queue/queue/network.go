@@ -1,4 +1,4 @@
-package net_queue
+package queue
 
 import (
 	"bufio"
@@ -20,7 +20,7 @@ type Net_Queue_Server struct {
 	}
 }*/
 
-func start_server(port int) {
+func Start_server(port int) {
 	queues = make(map[string]*Queue)
 	listener, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", port))
 	if err != nil {
@@ -55,11 +55,11 @@ func handle_client(c net.Conn) {
 		}
 		var resp NetResponse
 		if net_message.Msg_type == CMD {
-			resp = net_message.handle_cmd(queues)
+			resp = net_message.Handle_cmd(queues)
 		} else if net_message.Msg_type == WRITE_ENTRY {
-			resp = net_message.write_entry(queues)
+			resp = net_message.Write_entry(queues)
 		} else if net_message.Msg_type == READ_ENTRY {
-			resp = net_message.read_entry(queues)
+			resp = net_message.Read_entry(queues)
 		}
 		bytes, err := json.Marshal(resp)
 		if err != nil {

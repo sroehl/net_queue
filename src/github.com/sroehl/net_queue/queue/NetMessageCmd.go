@@ -1,4 +1,4 @@
-package net_queue
+package queue
 
 import "fmt"
 
@@ -16,7 +16,7 @@ type NetMessageCmd struct {
 	Arguments string
 }
 
-func (cmd NetMessageCmd) handle_cmd(queues map[string]*Queue) NetResponse {
+func (cmd NetMessageCmd) Handle_cmd(queues map[string]*Queue) NetResponse {
 	fmt.Printf("Processing Command:%v\n", cmd.Command)
 	switch cmd.Command {
 	case EXIT:

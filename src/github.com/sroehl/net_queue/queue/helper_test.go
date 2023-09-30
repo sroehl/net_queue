@@ -1,4 +1,4 @@
-package net_queue
+package queue
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 func TestMain(m *testing.M) {
 	fmt.Println("Starting listener")
-	go start_server(4545)
+	go Start_server(4545)
 	m.Run()
 	fmt.Println("Listener down")
 }

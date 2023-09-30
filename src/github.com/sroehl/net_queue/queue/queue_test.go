@@ -1,4 +1,4 @@
-package net_queue
+package queue
 
 import (
 	"fmt"

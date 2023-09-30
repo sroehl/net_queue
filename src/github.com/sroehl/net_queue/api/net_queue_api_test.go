@@ -1,7 +1,8 @@
-package net_queue
+package api
 
 import (
 	"fmt"
+	"net_queue/queue"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,7 +17,7 @@ func Test_Create_Queue_API(t *testing.T) {
 		assert.Fail(fmt.Sprintf("Create queue should have response, got error: %v", err))
 		return
 	}
-	assert.Equal(SUCCESS, resp.Status)
+	assert.Equal(queue.SUCCESS, resp.Status)
 	assert.Equal("", resp.Msg)
 }
 
@@ -29,7 +30,7 @@ func Test_Create_Queue_Already_Error_API(t *testing.T) {
 		assert.Fail(fmt.Sprintf("Create queue should have response, got error: %v", err))
 		return
 	}
-	assert.Equal(SUCCESS, resp.Status)
+	assert.Equal(queue.SUCCESS, resp.Status)
 	assert.Equal("", resp.Msg)
 
 	resp2, err2 := s.create_queue("testAlreadyCreated")
@@ -37,7 +38,7 @@ func Test_Create_Queue_Already_Error_API(t *testing.T) {
 		assert.Fail(fmt.Sprintf("Create queue should have response, got error: %v", err))
 		return
 	}
-	assert.Equal(ERROR, resp2.Status)
+	assert.Equal(queue.ERROR, resp2.Status)
 	assert.Equal("Queue already exists", resp2.Msg)
 }
 
@@ -50,7 +51,7 @@ func Test_Delete_Queue_API(t *testing.T) {
 		assert.Fail(fmt.Sprintf("Create queue should have response, got error: %v", err))
 		return
 	}
-	assert.Equal(SUCCESS, resp.Status)
+	assert.Equal(queue.SUCCESS, resp.Status)
 	assert.Equal("", resp.Msg)
 
 	resp2, err2 := s.delete_queue("deleteQueueTest")
@@ -58,7 +59,7 @@ func Test_Delete_Queue_API(t *testing.T) {
 		assert.Fail(fmt.Sprintf("Delete queue should have response, got error: %v", err))
 		return
 	}
-	assert.Equal(SUCCESS, resp2.Status)
+	assert.Equal(queue.SUCCESS, resp2.Status)
 }
 
 func Test_Delete_Nonexistant_Queue_API(t *testing.T) {
@@ -71,7 +72,7 @@ func Test_Delete_Nonexistant_Queue_API(t *testing.T) {
 		assert.Fail(fmt.Sprintf("Delete queue should have response, got error: %v", err))
 		return
 	}
-	assert.Equal(ERROR, resp.Status)
+	assert.Equal(queue.ERROR, resp.Status)
 }
 
 func Test_List_Queue(t *testing.T) {
@@ -82,18 +83,18 @@ func Test_List_Queue(t *testing.T) {
 	if create_err1 != nil {
 		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", create_err1))
 	}
-	assert.Equal(SUCCESS, create_resp1.Status)
+	assert.Equal(queue.SUCCESS, create_resp1.Status)
 	create_resp2, create_err2 := s.create_queue("listQueue2")
 	if create_err2 != nil {
 		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", create_err1))
 	}
-	assert.Equal(SUCCESS, create_resp2.Status)
+	assert.Equal(queue.SUCCESS, create_resp2.Status)
 
 	resp, err := s.list_queues()
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to list queues, got error: %v", create_err1))
 	}
-	assert.Equal(SUCCESS, resp.Status)
+	assert.Equal(queue.SUCCESS, resp.Status)
 	assert.Contains(resp.Msg, "listQueue1")
 	assert.Contains(resp.Msg, "listQueue2")
 }
@@ -106,7 +107,7 @@ func Test_Purge_Queue(t *testing.T) {
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", err))
 	}
-	assert.Equal(SUCCESS, create_resp.Status)
+	assert.Equal(queue.SUCCESS, create_resp.Status)
 
 	list_resp, err := s.list_queues()
 	if err != nil {
@@ -118,20 +119,20 @@ func Test_Purge_Queue(t *testing.T) {
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to write to queue, got error: %v", err))
 	}
-	assert.Equal(SUCCESS, write_resp.Status)
+	assert.Equal(queue.SUCCESS, write_resp.Status)
 	assert.Equal("", write_resp.Msg)
 
 	purge_resp, err := s.purge_queue("purgeQueue")
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to purge queue, got error: %v", err))
 	}
-	assert.Equal(SUCCESS, purge_resp.Status)
+	assert.Equal(queue.SUCCESS, purge_resp.Status)
 
 	read_resp, err := s.read_msg("purgeQueue", 0)
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to read from queue, got error: %v", err))
 	}
-	assert.Equal(NO_MSG, read_resp.Status)
+	assert.Equal(queue.NO_MSG, read_resp.Status)
 	assert.Equal("", read_resp.Msg)
 }
 
@@ -143,7 +144,7 @@ func Test_write_read_api(t *testing.T) {
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to create queue, got error: %v", err))
 	}
-	assert.Equal(SUCCESS, create_resp.Status)
+	assert.Equal(queue.SUCCESS, create_resp.Status)
 
 	list_resp, err := s.list_queues()
 	if err != nil {
@@ -155,13 +156,13 @@ func Test_write_read_api(t *testing.T) {
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to write to queue, got error: %v", err))
 	}
-	assert.Equal(SUCCESS, write_resp.Status)
+	assert.Equal(queue.SUCCESS, write_resp.Status)
 	assert.Equal("", write_resp.Msg)
 
 	read_resp, err := s.read_msg("writeQueue", 0)
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to read from queue, got error: %v", err))
 	}
-	assert.Equal(SUCCESS, read_resp.Status)
+	assert.Equal(queue.SUCCESS, read_resp.Status)
 	assert.Equal("This is a test", read_resp.Msg)
 }

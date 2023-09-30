@@ -1,4 +1,4 @@
-package net_queue
+package queue
 
 import (
 	"testing"
@@ -17,7 +17,7 @@ func Test_write_entry(t *testing.T) {
 		Msg:   "Test message",
 	}
 
-	resp1 := net_entry.write_entry(queues)
+	resp1 := net_entry.Write_entry(queues)
 	assert.Equal(SUCCESS, resp1.Status)
 	assert.Equal(1, queues[queue_name].size)
 
@@ -25,12 +25,12 @@ func Test_write_entry(t *testing.T) {
 		Queue: "badQueue",
 		Msg:   "Test message",
 	}
-	resp2 := net_entry2.write_entry(queues)
+	resp2 := net_entry2.Write_entry(queues)
 	assert.Equal(ERROR, resp2.Status)
 	assert.Equal("Queue does not exist", resp2.Msg)
 }
 
-func Test_read_entry(t *testing.T) {
+func Test_Read_entry(t *testing.T) {
 	assert := assert.New(t)
 	queue_name := "testQueue"
 	queues := make(map[string]*Queue)
@@ -49,7 +49,7 @@ func Test_read_entry(t *testing.T) {
 		Queue: queue_name,
 	}
 
-	resp := net_entry.read_entry(queues)
+	resp := net_entry.Read_entry(queues)
 	assert.Equal(SUCCESS, resp.Status)
 	assert.Equal("Test message", resp.Msg)
 }
@@ -68,7 +68,7 @@ func Test_read_many(t *testing.T) {
 	net_entry := NetMessageEntry{
 		Queue: queue_name,
 	}
-	resp := net_entry.read_entry(queues)
+	resp := net_entry.Read_entry(queues)
 	found := 1
 	has_more := resp.Status == HAS_MORE
 	idx := resp.Index
@@ -77,7 +77,7 @@ func Test_read_many(t *testing.T) {
 			Queue: queue_name,
 			Index: idx + 1,
 		}
-		resp2 := net_entry2.read_entry(queues)
+		resp2 := net_entry2.Read_entry(queues)
 		if idx+1 < 3 {
 			assert.Equal(HAS_MORE, resp2.Status)
 			assert.Equal(idx+1, resp2.Index)
