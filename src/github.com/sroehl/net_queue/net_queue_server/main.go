@@ -1,12 +1,19 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net_queue/queue"
+	"os"
 )
 
 func main() {
-	port := 4545
-	fmt.Printf("Starting server on %v", port)
-	queue.Start_server(port)
+	config_name := flag.String("config", ".config", "")
+	flag.Parse()
+	cfg, err := queue.Read_config(*config_name)
+	if err != nil {
+		fmt.Printf("Failed to read config file: %v", err)
+		os.Exit(-1)
+	}
+	queue.Start_server(cfg)
 }

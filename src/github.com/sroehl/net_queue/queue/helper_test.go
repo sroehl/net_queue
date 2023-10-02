@@ -7,7 +7,8 @@ import (
 
 func TestMain(m *testing.M) {
 	fmt.Println("Starting listener")
-	go Start_server(4545)
+	cfg := New_config("localhost", 4545)
+	go Start_server(cfg)
 	m.Run()
 	fmt.Println("Listener down")
 }

@@ -20,9 +20,12 @@ type Net_Queue_Server struct {
 	}
 }*/
 
-func Start_server(port int) {
+func Start_server(config Config) {
 	queues = make(map[string]*Queue)
-	listener, err := net.Listen("tcp", fmt.Sprintf("localhost:%v", port))
+
+	listen_addr := fmt.Sprintf("%v:%v", config.Server.ListenHost, config.Server.Port)
+	fmt.Printf("Listening on %v\n", listen_addr)
+	listener, err := net.Listen("tcp", listen_addr)
 	if err != nil {
 		log.Fatal(err)
 	}

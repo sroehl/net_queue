@@ -8,7 +8,8 @@ import (
 
 func TestMain(m *testing.M) {
 	fmt.Println("Starting listener")
-	go queue.Start_server(4545)
+	cfg := queue.New_config("localhost", 4545)
+	go queue.Start_server(cfg)
 	m.Run()
 	fmt.Println("Listener down")
 }
