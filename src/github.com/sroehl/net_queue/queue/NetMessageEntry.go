@@ -1,9 +1,15 @@
 package queue
 
+type NetMessageEntryOptions struct {
+	Index  int
+	Unread bool
+	Delete bool
+}
+
 type NetMessageEntry struct {
 	Queue string
 	Msg   string
-	Index int
+	Opt   NetMessageEntryOptions
 }
 
 func (entry NetMessageEntry) Write_entry(queues map[string]*Queue) NetResponse {
@@ -19,7 +25,7 @@ func (entry NetMessageEntry) Write_entry(queues map[string]*Queue) NetResponse {
 func (entry NetMessageEntry) Read_entry(queues map[string]*Queue) NetResponse {
 	queue, ok := queues[entry.Queue]
 	if ok {
-		result, err := queue.read(false, false, entry.Index)
+		result, err := queue.read(entry.Opt.Unread, entry.Opt.Delete, entry.Opt.Index)
 		if err != nil {
 			return new_netresponse(NO_MSG, "")
 		}

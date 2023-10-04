@@ -15,14 +15,14 @@ type Server struct {
 	conn      net.Conn
 }
 
-func new_server(host string, port int) Server {
+func New_server(host string, port int) Server {
 	return Server{
 		host: host,
 		port: port,
 	}
 }
 
-func (s Server) create_queue(queue_name string) (queue.NetResponse, error) {
+func (s Server) Create_queue(queue_name string) (queue.NetResponse, error) {
 	net_cmd := queue.NetMessageCmd{
 		Command:   queue.CREATE_QUEUE,
 		Arguments: queue_name,
@@ -30,7 +30,7 @@ func (s Server) create_queue(queue_name string) (queue.NetResponse, error) {
 	return s.send_cmd(net_cmd)
 }
 
-func (s Server) delete_queue(queue_name string) (queue.NetResponse, error) {
+func (s Server) Delete_queue(queue_name string) (queue.NetResponse, error) {
 	net_cmd := queue.NetMessageCmd{
 		Command:   queue.DELETE_QUEUE,
 		Arguments: queue_name,
@@ -38,14 +38,14 @@ func (s Server) delete_queue(queue_name string) (queue.NetResponse, error) {
 	return s.send_cmd(net_cmd)
 }
 
-func (s Server) list_queues() (queue.NetResponse, error) {
+func (s Server) List_queues() (queue.NetResponse, error) {
 	net_cmd := queue.NetMessageCmd{
 		Command: queue.LIST_QUEUES,
 	}
 	return s.send_cmd(net_cmd)
 }
 
-func (s Server) purge_queue(queue_name string) (queue.NetResponse, error) {
+func (s Server) Purge_queue(queue_name string) (queue.NetResponse, error) {
 	net_cmd := queue.NetMessageCmd{
 		Command:   queue.PURGE_QUEUE,
 		Arguments: queue_name,
@@ -54,7 +54,7 @@ func (s Server) purge_queue(queue_name string) (queue.NetResponse, error) {
 }
 
 func (s Server) send_cmd(net_cmd queue.NetMessageCmd) (queue.NetResponse, error) {
-	s.connect()
+	s.Connect()
 	net_msg := queue.NetMessage{
 		Msg_type:      queue.CMD,
 		NetMessageCmd: net_cmd,
@@ -81,7 +81,7 @@ func (s Server) send_cmd(net_cmd queue.NetMessageCmd) (queue.NetResponse, error)
 	return *net_response, nil
 }
 
-func (s Server) write_msg(queue_name string, msg string) (queue.NetResponse, error) {
+func (s Server) Write_msg(queue_name string, msg string) (queue.NetResponse, error) {
 	net_entry := queue.NetMessageEntry{
 		Queue: queue_name,
 		Msg:   msg,
@@ -89,16 +89,21 @@ func (s Server) write_msg(queue_name string, msg string) (queue.NetResponse, err
 	return s.send_msg(net_entry, queue.WRITE_ENTRY)
 }
 
-func (s Server) read_msg(queue_name string, index int) (queue.NetResponse, error) {
+func (s Server) Read_msg(queue_name string, index int, unread bool, delete bool) (queue.NetResponse, error) {
+	opt := queue.NetMessageEntryOptions{
+		Index:  index,
+		Unread: unread,
+		Delete: delete,
+	}
 	net_entry := queue.NetMessageEntry{
 		Queue: queue_name,
-		Index: index,
+		Opt:   opt,
 	}
 	return s.send_msg(net_entry, queue.READ_ENTRY)
 }
 
 func (s Server) send_msg(net_entry queue.NetMessageEntry, msg_type int) (queue.NetResponse, error) {
-	s.connect()
+	s.Connect()
 	net_msg := queue.NetMessage{
 		Msg_type:        msg_type,
 		NetMessageEntry: net_entry,
@@ -125,7 +130,7 @@ func (s Server) send_msg(net_entry queue.NetMessageEntry, msg_type int) (queue.N
 	return *net_response, nil
 }
 
-func (s *Server) connect() {
+func (s *Server) Connect() {
 	if !s.connected {
 		var err error
 		tcpAddr, _ := net.ResolveTCPAddr("tcp4", fmt.Sprintf("%v:%v", s.host, s.port))

@@ -75,7 +75,9 @@ func Test_read_many(t *testing.T) {
 	for has_more {
 		net_entry2 := NetMessageEntry{
 			Queue: queue_name,
-			Index: idx + 1,
+			Opt: NetMessageEntryOptions{
+				Index: idx + 1,
+			},
 		}
 		resp2 := net_entry2.Read_entry(queues)
 		if idx+1 < 3 {
