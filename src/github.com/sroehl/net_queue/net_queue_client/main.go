@@ -30,6 +30,7 @@ func main() {
 	fmt.Printf("Connecting to %v:%v\n", opts.Host, opts.Port)
 	s := api.New_server(opts.Host, opts.Port)
 	s.Connect()
+	defer s.Close()
 	if opts.Read {
 		read_queue(s, opts.Queue, opts.Stay_Connected)
 	} else if len(opts.Message) > 0 {
@@ -43,11 +44,16 @@ func main() {
 	} else {
 		fmt.Printf("Invalid usage: must read/write message or send command (create, purge, delete)\n")
 	}
+	s.Close()
 }
 
 func read_queue(s api.Server, queue_name string, stay_connected bool) {
+	ch := make(chan api.ReadMsgResult)
 	for {
-		resp, err := s.Read_msg(queue_name, 0, true, true)
+		go s.Read_msg(queue_name, 0, true, true, stay_connected, ch)
+		result := <-ch
+		err := result.Err
+		resp := result.Response
 		if err != nil {
 			fmt.Printf("Failed: %v", err)
 			return

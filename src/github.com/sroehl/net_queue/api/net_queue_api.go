@@ -89,17 +89,42 @@ func (s Server) Write_msg(queue_name string, msg string) (queue.NetResponse, err
 	return s.send_msg(net_entry, queue.WRITE_ENTRY)
 }
 
-func (s Server) Read_msg(queue_name string, index int, unread bool, delete bool) (queue.NetResponse, error) {
-	opt := queue.NetMessageEntryOptions{
-		Index:  index,
-		Unread: unread,
-		Delete: delete,
+type ReadMsgResult struct {
+	Response queue.NetResponse
+	Err      error
+}
+
+func (s Server) Read_msg(queue_name string, index int, unread bool, delete bool, continuous bool, ch chan ReadMsgResult) {
+	opt := queue.ReadOptions{
+		Index:      index,
+		Unread:     unread,
+		Delete:     delete,
+		Continuous: continuous,
 	}
 	net_entry := queue.NetMessageEntry{
 		Queue: queue_name,
 		Opt:   opt,
 	}
-	return s.send_msg(net_entry, queue.READ_ENTRY)
+	if continuous {
+		result, err := s.send_msg(net_entry, queue.READ_ENTRY)
+		ch <- ReadMsgResult{
+			Response: result,
+			Err:      err,
+		}
+		for {
+			result, err := s.receive_msg()
+			ch <- ReadMsgResult{
+				Response: result,
+				Err:      err,
+			}
+		}
+	}
+	result, err := s.send_msg(net_entry, queue.READ_ENTRY)
+	ch <- ReadMsgResult{
+		Response: result,
+		Err:      err,
+	}
+	close(ch)
 }
 
 func (s Server) send_msg(net_entry queue.NetMessageEntry, msg_type int) (queue.NetResponse, error) {
@@ -113,9 +138,13 @@ func (s Server) send_msg(net_entry queue.NetMessageEntry, msg_type int) (queue.N
 		fmt.Printf("Error marshalling in send_msg")
 		return queue.NetResponse{}, err
 	}
-	br := bufio.NewReader(s.conn)
 	s.conn.Write(encoded)
 	s.conn.Write([]byte{'\n'})
+	return s.receive_msg()
+}
+
+func (s *Server) receive_msg() (queue.NetResponse, error) {
+	br := bufio.NewReader(s.conn)
 	buffer, err := br.ReadBytes('\n')
 	if err != nil {
 		fmt.Printf("Error reading bytes %v\n", err)
@@ -138,5 +167,12 @@ func (s *Server) Connect() {
 		if err != nil {
 			return
 		}
+		s.connected = true
+	}
+}
+
+func (s *Server) Close() {
+	if s.connected {
+		s.conn.Close()
 	}
 }

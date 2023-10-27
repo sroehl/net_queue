@@ -128,7 +128,11 @@ func Test_Purge_Queue(t *testing.T) {
 	}
 	assert.Equal(queue.SUCCESS, purge_resp.Status)
 
-	read_resp, err := s.Read_msg("purgeQueue", 0, false, false)
+	ch := make(chan ReadMsgResult)
+	go s.Read_msg("purgeQueue", 0, false, false, false, ch)
+	result := <-ch
+	err = result.Err
+	read_resp := result.Response
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to read from queue, got error: %v", err))
 	}
@@ -159,7 +163,11 @@ func Test_write_read_api(t *testing.T) {
 	assert.Equal(queue.SUCCESS, write_resp.Status)
 	assert.Equal("", write_resp.Msg)
 
-	read_resp, err := s.Read_msg("writeQueue", 0, false, false)
+	ch := make(chan ReadMsgResult)
+	go s.Read_msg("writeQueue", 0, false, false, false, ch)
+	result := <-ch
+	err = result.Err
+	read_resp := result.Response
 	if err != nil {
 		assert.Fail(fmt.Sprintf("Failed to read from queue, got error: %v", err))
 	}

@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"time"
 )
 
 var queues map[string]*Queue
@@ -47,7 +49,6 @@ func handle_client(c net.Conn) {
 	for {
 		buf, err := br.ReadBytes('\n')
 		if err != nil {
-			fmt.Printf("Failed reading bytes: %v\n", err)
 			return
 		}
 		var net_message = &NetMessage{}
@@ -57,19 +58,59 @@ func handle_client(c net.Conn) {
 			return
 		}
 		var resp NetResponse
-		if net_message.Msg_type == CMD {
-			resp = net_message.Handle_cmd(queues)
-		} else if net_message.Msg_type == WRITE_ENTRY {
-			resp = net_message.Write_entry(queues)
-		} else if net_message.Msg_type == READ_ENTRY {
-			resp = net_message.Read_entry(queues)
+		if net_message.Msg_type == READ_ENTRY {
+			ch := make(chan NetResponse)
+			done := make(chan bool)
+			go net_message.Read_entry(queues, ch, done)
+			for {
+				closed := check_closed(c)
+				if !closed {
+					resp, more := <-ch
+					bytes, err := json.Marshal(resp)
+					if err != nil {
+						fmt.Printf("Client resp bad: %v", err)
+						return
+					}
+					_, write_err := c.Write(append(bytes, '\n'))
+					if write_err != nil {
+						closed = true
+					}
+					if !more {
+						break
+					}
+				}
+				if closed {
+					done <- true
+					break
+				} else {
+					done <- false
+				}
+			}
+		} else {
+			if net_message.Msg_type == CMD {
+				resp = net_message.Handle_cmd(queues)
+			} else if net_message.Msg_type == WRITE_ENTRY {
+				resp = net_message.Write_entry(queues)
+			}
+			bytes, err := json.Marshal(resp)
+			if err != nil {
+				fmt.Printf("Client resp bad: %v", err)
+				return
+			}
+			c.Write(bytes)
+			c.Write([]byte{'\n'})
 		}
-		bytes, err := json.Marshal(resp)
-		if err != nil {
-			fmt.Printf("Client resp bad: %v", err)
-			return
-		}
-		c.Write(bytes)
-		c.Write([]byte{'\n'})
+	}
+}
+
+func check_closed(c net.Conn) bool {
+	one := make([]byte, 1)
+	c.SetReadDeadline(time.Now())
+	if _, err := c.Read(one); err == io.EOF {
+		c.Close()
+		return true
+	} else {
+		c.SetReadDeadline(time.Now().Add(10 * time.Millisecond))
+		return false
 	}
 }

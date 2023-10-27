@@ -60,3 +60,16 @@ func Test_list_queues(t *testing.T) {
 	assert.Equal(SUCCESS, resp2.Status)
 	assert.Equal(4, len(strings.Split(resp2.Msg, ",")))
 }
+
+func Test_purge_queues(t *testing.T) {
+	assert := assert.New(t)
+	queues := make(map[string]*Queue)
+	queues["testQueue0"] = new_queue("testQueue0")
+	net_cmd := NetMessageCmd{
+		Command:   PURGE_QUEUE,
+		Arguments: "testQueue0",
+	}
+	resp1 := net_cmd.Handle_cmd(queues)
+	assert.Equal(SUCCESS, resp1.Status)
+	assert.Equal("", resp1.Msg)
+}
